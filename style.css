@@ -159,7 +159,7 @@ input:focus, select:focus {
     box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
 }
 
-/* Radio Group Design for Gender */
+/* Radio Group Design for Gender & Diet Type */
 .radio-group {
     display: flex;
     gap: 1rem;
@@ -186,6 +186,17 @@ input:focus, select:focus {
     background-color: var(--accent-color);
     color: white;
     border-color: var(--accent-color);
+}
+
+/* Specific styling variants for dietary selectors when active */
+.radio-group input[type="radio"]:checked + .diet-veg {
+    background-color: #10b981; /* Emerald */
+    border-color: #10b981;
+}
+
+.radio-group input[type="radio"]:checked + .diet-nonveg {
+    background-color: #ef4444; /* Crimson Red */
+    border-color: #ef4444;
 }
 
 .submit-btn {
