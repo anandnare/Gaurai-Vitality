@@ -22,7 +22,7 @@ const heightCmInput = document.getElementById('heightCm');
 const heightFtInput = document.getElementById('heightFt');
 const heightInInput = document.getElementById('heightIn');
 
-// Initialize validation attributes correctly on load
+// Initialize validation tracking attributes
 heightCmInput.required = true;
 
 heightUnitSelect.addEventListener('change', (e) => {
@@ -41,26 +41,48 @@ heightUnitSelect.addEventListener('change', (e) => {
     }
 });
 
-// --- Core Dynamic Meal Database ---
+// --- Core Dynamic Meal Database (Split into Veg & Non-Veg Engines) ---
 const mealDatabase = {
-    maintain: [
-        { name: "Breakfast (08:00 AM)", desc: "Oatmeal with whey protein, chia seeds, and fresh berries." },
-        { name: "Lunch (01:00 PM)", desc: "Grilled chicken breast or tofu paired with brown rice and mixed green vegetables." },
-        { name: "Evening Snack (05:00 PM)", desc: "Whole grain toast topped with mashed avocado and boiled eggs or paneer." },
-        { name: "Dinner (08:30 PM)", desc: "Baked salmon or chickpea stir-fry with sweet potato sides." }
-    ],
-    lose: [
-        { name: "Breakfast (08:00 AM)", desc: "Egg white omelet or scrambled tofu loaded with spinach, tomatoes, and mushrooms." },
-        { name: "Lunch (01:00 PM)", desc: "Big green salad with lean turkey strips or grilled paneer tossed in light olive oil." },
-        { name: "Evening Snack (05:00 PM)", desc: "Greek yogurt or dairy-free protein shake alongside a handful of almonds." },
-        { name: "Dinner (08:30 PM)", desc: "Steamed white fish or lentil soup served alongside broccoli and cauliflower rice." }
-    ],
-    gain: [
-        { name: "Breakfast (08:00 AM)", desc: "Smoothie made with whole milk/oat milk, peanut butter, oats, bananas, and protein powder." },
-        { name: "Lunch (01:00 PM)", desc: "Lean beef strips or edamame tempeh paired generously with quinoa and avocado slices." },
-        { name: "Evening Snack (05:00 PM)", desc: "Mixed nut varieties, cottage cheese, or an artisanal fruit and nut nutrition bar." },
-        { name: "Dinner (08:30 PM)", desc: "Hearty chicken or bean burrito bowl layered with brown rice, black beans, and guacamole." }
-    ]
+    veg: {
+        maintain: [
+            { name: "Breakfast (08:00 AM)", desc: "Sprouted moong chat or rolled oats with soy milk, almonds, and flax seeds." },
+            { name: "Lunch (01:00 PM)", desc: "Paneer bhurji (150g) paired with multi-grain rotis, dal tadka, and mixed salad." },
+            { name: "Evening Snack (05:00 PM)", desc: "Roasted chickpeas (chana) or makhana with a green tea brew." },
+            { name: "Dinner (08:30 PM)", desc: "Tofu stir-fry with broccoli, bell peppers, and a medium bowl of brown rice." }
+        ],
+        lose: [
+            { name: "Breakfast (08:00 AM)", desc: "Besan cheela (chickpea flour pancake) loaded with finely chopped spinach and low-fat paneer." },
+            { name: "Lunch (01:00 PM)", desc: "Soya chunks curry with cauliflower rice and a large cucumber-tomato salad bowl." },
+            { name: "Evening Snack (05:00 PM)", desc: "Double-toned curd or Greek yogurt mixed with a dash of chia seeds." },
+            { name: "Dinner (08:30 PM)", desc: "Clear lentil soup with steamed mushrooms, broccoli, and roasted asparagus." }
+        ],
+        gain: [
+            { name: "Breakfast (08:00 AM)", desc: "High-calorie shake: Bananas, peanut butter, whole milk, oats, and ashwagandha powder." },
+            { name: "Lunch (01:00 PM)", desc: "Thick paneer tikka masala served along with dal makhani, layered paratha, and curd." },
+            { name: "Evening Snack (05:00 PM)", desc: "Handful of walnuts, cashews, raisins, and home-baked paneer cubes." },
+            { name: "Dinner (08:30 PM)", desc: "Loaded soybean and vegetable biryani served with an almond-infused raita dip." }
+        ]
+    },
+    nonveg: {
+        maintain: [
+            { name: "Breakfast (08:00 AM)", desc: "3 whole scrambled eggs on whole-wheat toast with avocado spread." },
+            { name: "Lunch (01:00 PM)", desc: "Grilled chicken breast (200g) served with basmati rice and a side of steamed green beans." },
+            { name: "Evening Snack (05:00 PM)", desc: "Boiled egg white salad with black pepper or clean whey protein isolates." },
+            { name: "Dinner (08:30 PM)", desc: "Pan-seared Salmon or Rohu fish with sweet potato mash and a serving of sautéed zucchini." }
+        ],
+        lose: [
+            { name: "Breakfast (08:00 AM)", desc: "Egg white omelet (4 whites) whisked with onions, green chilies, and spinach leaves." },
+            { name: "Lunch (01:00 PM)", desc: "Shredded chicken breast salad tossed with olive oil, lemon zest, lettuce, and bell peppers." },
+            { name: "Evening Snack (05:00 PM)", desc: "A bowl of clear chicken broth or tuna salad chunks mixed with celery." },
+            { name: "Dinner (08:30 PM)", desc: "Grilled lean turkey or white fish fillet served with grilled asparagus and boiled broccoli." }
+        ],
+        gain: [
+            { name: "Breakfast (08:00 AM)", desc: "3 egg omelet + 2 toasted slices with peanut butter and a tall glass of fresh orange juice." },
+            { name: "Lunch (01:00 PM)", desc: "Mutton curry or chicken thigh layout served alongside ghee rice and a bowl of dal." },
+            { name: "Evening Snack (05:00 PM)", desc: "Chicken breast sandwich with cheese slices or structural whey mass gainer smoothies." },
+            { name: "Dinner (08:30 PM)", desc: "High-protein fish fillet or lean minced beef served with roasted potatoes and a side of pasta." }
+        ]
+    }
 };
 
 // --- Calculation Engine & Form Processing ---
@@ -71,28 +93,27 @@ const resultsContent = document.getElementById('resultsContent');
 form.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    // Fetch Form Element values
+    // Fetch Input Parameters
     const gender = document.querySelector('input[name="gender"]:checked').value;
+    const diet = document.querySelector('input[name="diet"]:checked').value;
     const age = parseInt(document.getElementById('age').value);
     const weight = parseFloat(document.getElementById('weight').value);
     const unitSelection = heightUnitSelect.value;
     const goal = document.getElementById('goal').value;
 
-    // Process Height across Metrics Units & Parameters
+    // Process Height Unit Conversion Calculations
     let heightCm = 0;
     if (unitSelection === 'cm') {
         heightCm = parseFloat(heightCmInput.value);
     } else {
         const feet = parseFloat(heightFtInput.value || 0);
         const inches = parseFloat(heightInInput.value || 0);
-        // Step conversion metric: (Feet * 12 + Inches) * 2.54 centimeters
         heightCm = ((feet * 12) + inches) * 2.54;
     }
 
-    // Safety fallback metric check
     if (!heightCm || heightCm <= 0) return;
 
-    // 1. Calculate Basal Metabolic Rate (BMR) via Miflin-St Jeor Equation
+    // 1. Calculate Basal Metabolic Rate (BMR) via Mifflin-St Jeor Formula
     let bmr;
     if (gender === 'male') {
         bmr = (10 * weight) + (6.25 * heightCm) - (5 * age) + 5;
@@ -106,24 +127,31 @@ form.addEventListener('submit', (e) => {
     // 3. Calibrate Target Daily Calories based on Goal Selection
     let targetCalories;
     if (goal === 'lose') {
-        targetCalories = tdee - 450; // Caloric Deficit
+        targetCalories = tdee - 450;
     } else if (goal === 'gain') {
-        targetCalories = tdee + 400; // Caloric Surplus
+        targetCalories = tdee + 400;
     } else {
-        targetCalories = tdee;       // Maintenance Target
+        targetCalories = tdee;
     }
 
     // 4. Macro-distribution Strategy Calculation
-    // Protein Strategy: ~2.2g per kg bodyweight
-    let proteinGrams = Math.round(weight * 2.2);
-    // Fats Strategy: ~25% allocation of total energy values (1g fat = 9 kcal)
-    let fatGrams = Math.round((targetCalories * 0.25) / 9);
-    // Carbs Strategy: Remainder calculated metrics (1g carb = 4 kcal)
+    let proteinGrams, fatGrams, carbGrams;
+
+    if (diet === 'veg') {
+        // Vegetarian: High quality plant foods have slightly lower protein absorption rates.
+        // Carbs are slightly higher due to the nature of vegetarian protein sources (lentils/beans).
+        proteinGrams = Math.round(weight * 1.8); 
+        fatGrams = Math.round((targetCalories * 0.25) / 9);
+    } else {
+        // Non-Vegetarian: Bioavailable direct protein source distribution strategy profiles.
+        proteinGrams = Math.round(weight * 2.2); 
+        fatGrams = Math.round((targetCalories * 0.23) / 9);
+    }
+
     let proteinKcal = proteinGrams * 4;
     let fatKcal = fatGrams * 9;
-    let carbGrams = Math.round((targetCalories - (proteinKcal + fatKcal)) / 4);
+    carbGrams = Math.round((targetCalories - (proteinKcal + fatKcal)) / 4);
 
-    // Fallback safety to ensure no negative numbers generated on edge parameters
     if (carbGrams < 0) carbGrams = 50; 
 
     // 5. Update DOM Values dynamically
@@ -132,14 +160,19 @@ form.addEventListener('submit', (e) => {
     document.getElementById('carbsOutput').textContent = `${carbGrams}g`;
     document.getElementById('fatsOutput').textContent = `${fatGrams}g`;
 
-    // 6. Generate Structural Timeline Outputs
+    // 6. Generate Structural Timeline Outputs based on Diet Type Engine
     const timeline = document.getElementById('mealTimeline');
-    timeline.innerHTML = ''; // Clear prior results view
+    timeline.innerHTML = ''; 
     
-    const selectedMeals = mealDatabase[goal];
+    // Select specific timeline database section matching chosen filters
+    const selectedMeals = mealDatabase[diet][goal];
     selectedMeals.forEach(meal => {
         const mealElement = document.createElement('div');
         mealElement.className = 'meal-card';
+        // Accent dynamically modified on diet choices
+        if (diet === 'nonveg') {
+            mealElement.style.borderLeftColor = '#ef4444';
+        }
         mealElement.innerHTML = `
             <div class="meal-header">
                 <span>${meal.name}</span>
@@ -153,7 +186,6 @@ form.addEventListener('submit', (e) => {
     placeholder.classList.add('hidden');
     resultsContent.classList.remove('hidden');
     
-    // Auto smooth scroll down to viewport section logic for smaller devices
     if (window.innerWidth <= 900) {
         document.getElementById('resultsCard').scrollIntoView({ behavior: 'smooth' });
     }
